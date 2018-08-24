@@ -4,45 +4,43 @@ from math import atan2, sin, cos
 import random
 
 
-class Client(GuiClient):
-
+class Client(HeadlessClient):
     def init(self):
         self.name = "!@#$%^&*()!@#$%^&*()!@#$%^&*()"
         #self.name = "t1"
         #self.name = "Dark Souls IV"
         #self.upgrade_order = [1, 1, 1, 1, 5, 5, 5, 6, 6, 6, 1, 1, 1, 1, 5, 6, 5, 6, 5, 6, 5, 6, 5, 6, 3, 3, 3, 3, 3, 3, 3, 3]
         #self.upgrade_order = [0, 0, 0, 0, 1, 1, 1, 1, 2, 2, 2, 2, 1, 0, 1, 0, 1, 0, 1, 0, 7, 7, 7, 7, 2, 2, 2, 2, 7, 7, 7, 7, 5, 5, 6, 6, 5, 5, 6, 6]
-        self.upgrade_order = [
-        {
-        7 : 2,
+        self.upgrade_order = [{
+            7: 2,
         }, {
-        0 : 4,
-        1 : 4,
-        2 : 6,
+            0: 4,
+            1: 4,
+            2: 6,
         }, {
-        0 : 8,
-        1 : 8,
-        2 : 8,
-        7 : 8,
+            0: 8,
+            1: 8,
+            2: 8,
+            7: 8,
         }, {
-        6 : 8,
+            6: 8,
         }, {
-        5 : 8,
+            5: 8,
         }, {
-        4 : 8,
+            4: 8,
         }, {
-        0 : 8,
-        1 : 8,
-        2 : 8,
-        3 : 8,
-        4 : 8,
-        5 : 8,
-        6 : 8,
-        7 : 8,
+            0: 8,
+            1: 8,
+            2: 8,
+            3: 8,
+            4: 8,
+            5: 8,
+            6: 8,
+            7: 8,
         }]
         self.aggressive = 1
         self.coward = 0
-        self.mode = 0 # 0->poly, 1->tank, 2->bullet, 3->pri
+        self.mode = 0  # 0->poly, 1->tank, 2->bullet, 3->pri
         self.count = 0
         self.force = 0
         self.lastforcedir = [0, 0]
@@ -103,7 +101,7 @@ class Client(GuiClient):
             else:
                 self.aggressive = 1
         else:
-            if hero.health < hero.max_health // 2: # no need to poly
+            if hero.health < hero.max_health // 2:  # no need to poly
                 self.aggressive = 0
             else:
                 self.aggressive = 1
@@ -179,7 +177,9 @@ class Client(GuiClient):
             if target_tank == None:
                 target_poly = nearest_lhp
                 self.shoot_at(*target_poly.position)
-            elif nearest_lhp and (nearest_powdis - nearest_lhp.health * health_delta) ** 0.5 < nearest_lhp.radius + hero.radius + 20:
+            elif nearest_lhp and (
+                    nearest_powdis - nearest_lhp.health * health_delta
+            )**0.5 < nearest_lhp.radius + hero.radius + 20:
                 target_poly = nearest_lhp
                 #self.polynear = 1 #Bug??
         ## Bullets
@@ -193,14 +193,15 @@ class Client(GuiClient):
                     powvel = vx**2 + vy**2
                     hvx = hero.velocity[0]
                     hvy = hero.velocity[1]
-                    powhvel = hvx**2+hvy**2
+                    powhvel = hvx**2 + hvy**2
                     if b.owner_id == hero.id or powvel < powhvel:
                         continue
                     health_delta = 40
                     dx = hx - b.position[0]
                     dy = hy - b.position[1]
                     # print(atan2(dy, dx), atan2(b.velocity.y, b.velocity.x))
-                    ddd = abs(atan2(dy, dx) - atan2(b.velocity.y, b.velocity.x))
+                    ddd = abs(
+                        atan2(dy, dx) - atan2(b.velocity.y, b.velocity.x))
                     if ddd > 3.14159:
                         ddd = 6.283 - ddd
                     if ddd < 10 * 3.14159 / 180:
@@ -219,12 +220,15 @@ class Client(GuiClient):
             prioritized[0] = -1
         if hero.position.y > 3800 + random.randint(-20, 0):
             prioritized[1] = -1
-        if (self.coward or self.regenerating) and prioritized[0] != 0 or prioritized[1] != 0:
+        if (self.coward or self.regenerating
+            ) and prioritized[0] != 0 or prioritized[1] != 0:
             #if self.mode != 3:
             #    self.mode = 3
             print(self.count, 'pri mode')
             self.force = 60
-            self.lastforcedir = [hx + prioritized[0] * 1000, hy + prioritized[1] * 1000]
+            self.lastforcedir = [
+                hx + prioritized[0] * 1000, hy + prioritized[1] * 1000
+            ]
             self.accelerate_towards(*self.lastforcedir)
         elif (self.coward or self.regenerating) and target_bullet:
             if self.mode != 2:
@@ -238,9 +242,9 @@ class Client(GuiClient):
             print(normal * 180 / 3.14159)
             self.accelerate_towards(cos(normal) * 1000, sin(normal) * 1000)
             # if(hero.position[1] > 2000 + random.randint(-100, 100) and bvec[0] > 0):
-                # self.accelerate_towards(hx + bvec[1], hy - bvec[0])
+            # self.accelerate_towards(hx + bvec[1], hy - bvec[0])
             # else:
-                # self.accelerate_towards(hx - bvec[1], hy + bvec[0])
+            # self.accelerate_towards(hx - bvec[1], hy + bvec[0])
         else:
             if target_tank:
                 #if self.mode != 1:
@@ -252,12 +256,13 @@ class Client(GuiClient):
                 elif target_tank.bullet_damage_level > hero.level / 5:
                     tx = hx + vec[0]
                     ty = hy + vec[1]
-                    dis = (vec[0]**2 + vec[1]**2) ** 0.5
+                    dis = (vec[0]**2 + vec[1]**2)**0.5
                     ddd = atan2(vec[1], vec[0])
                     if ddd > 3.14159:
                         ddd = 6.283 - ddd
                     orientation = ddd - 30 / 180 * 3.14159
-                    self.accelerate_towards(dis * cos(orientation), dis * sin(orientation))
+                    self.accelerate_towards(dis * cos(orientation),
+                                            dis * sin(orientation))
                 else:
                     self.accelerate_towards(hx + vec[0], hy + vec[1])
             elif target_poly:

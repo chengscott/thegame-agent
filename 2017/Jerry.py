@@ -8,18 +8,15 @@ import itertools
 import bisect
 
 
-class Client(GuiClient):
+class Client(HeadlessClient):
 
-    skills_to_learn = [
-        (1, [Ability.HealthRegen]),
-        (4, [Ability.Reload]),
-        (2, [Ability.BulletSpeed]),
-        (8, [Ability.Reload]),
-        (4, [Ability.BulletSpeed]),
-        (2, [Ability.MaxHealth]),
-        (8, [Ability.BulletDamage, Ability.HealthRegen, Ability.BulletPenetration]),
-        (8, range(8))
-    ]
+    skills_to_learn = [(1, [Ability.HealthRegen]), (4, [Ability.Reload]),
+                       (2, [Ability.BulletSpeed]), (8, [Ability.Reload]),
+                       (4,
+                        [Ability.BulletSpeed]), (2, [Ability.MaxHealth]), (8, [
+                            Ability.BulletDamage, Ability.HealthRegen,
+                            Ability.BulletPenetration
+                        ]), (8, range(8))]
 
     def level_skill(self, hero):
         for target_level, skills in self.skills_to_learn:
@@ -43,13 +40,14 @@ class Client(GuiClient):
         hero = self._hero
         x = target.position.x - hero.position.x
         y = target.position.y - hero.position.y
-        phi = math.atan2(target.velocity.y, target.velocity.x) - math.atan2(y, x)
+        phi = math.atan2(target.velocity.y, target.velocity.x) - math.atan2(
+            y, x)
         u = math.hypot(target.velocity.y, target.velocity.x)
         v = hero.bullet_speed
         if u < v:
-            theta0 = math.asin(u/v*math.sin(phi))
-            theta1 = -math.asin(u/v*math.sin(phi))+math.pi
-            self.shoot(math.atan2(y, x)+theta0)
+            theta0 = math.asin(u / v * math.sin(phi))
+            theta1 = -math.asin(u / v * math.sin(phi)) + math.pi
+            self.shoot(math.atan2(y, x) + theta0)
 
     def shots_to_kill(self, target):
         damaging_ticks = math.ceil(
@@ -69,17 +67,18 @@ class Client(GuiClient):
         return target.rewarding_experience / self.ticks_to_kill(target)
 
     def get_shoot_target(self, hero, polygons, heroes, bullets):
-        heroes = [h for h in heroes if math.hypot(h.velocity.y, h.velocity.x) < hero.bullet_speed * 0.9]
+        heroes = [
+            h for h in heroes
+            if math.hypot(h.velocity.y, h.velocity.x) < hero.bullet_speed * 0.9
+        ]
         bullets = [b for b in bullets if b.owner_id != hero.id]
 
         targets = sorted(
             itertools.chain(
                 # polygons,
                 heroes,
-                bullets
-            ),
-            key=self.distance
-        )
+                bullets),
+            key=self.distance)
         if targets and self.distance(targets[0]) < 200:
             return targets[0]
 
@@ -110,8 +109,7 @@ class Client(GuiClient):
                 polygons,
                 (bullet for bullet in bullets if bullet.owner_id != hero.id),
             ),
-            key=self.distance
-        )
+            key=self.distance)
 
     def action(self, hero, polygons, heroes, bullets):
 
@@ -128,23 +126,34 @@ class Client(GuiClient):
 
         self.level_skill(hero)
 
-
         if polygons:
-            shoosss = min(polygons, key = lambda s : math.hypot(s.position.x - hero.position.x, s.position.y - hero.position.y))
-            if(shoosss.edges != 5):
-                if hero.health > (hero.max_health)/2:
+            shoosss = min(
+                polygons,
+                key=
+                lambda s: math.hypot(s.position.x - hero.position.x, s.position.y - hero.position.y)
+            )
+            if (shoosss.edges != 5):
+                if hero.health > (hero.max_health) / 2:
                     self.accelerate_towards(*shoosss.position)
             else:
-                self.accelerate_towards(random.randint(0,5000), random.randint(0,4000))
+                self.accelerate_towards(
+                    random.randint(0, 5000), random.randint(0, 4000))
         else:
-            self.accelerate_towards(random.randint(0,5000), random.randint(0,4000))
+            self.accelerate_towards(
+                random.randint(0, 5000), random.randint(0, 4000))
 
         if heroes:
-            hero_short = min(heroes, key = lambda s : math.hypot(s.position.x - hero.position.x, s.position.y - hero.position.y))
-            pos = (hero_short.position.x - hero.position.x, hero_short.position.y - hero.position.y)
+            hero_short = min(
+                heroes,
+                key=
+                lambda s: math.hypot(s.position.x - hero.position.x, s.position.y - hero.position.y)
+            )
+            pos = (hero_short.position.x - hero.position.x,
+                   hero_short.position.y - hero.position.y)
             if hero_short.score <= hero.score - 500 and hero.health - 500 > hero_short.health:
                 self.accelerate_towards(*hero_short.position)
             else:
-                self.accelerate(math.atan2(pos[1], pos[0])+math.pi*0.7)
+                self.accelerate(math.atan2(pos[1], pos[0]) + math.pi * 0.7)
+
 
 Client.main()

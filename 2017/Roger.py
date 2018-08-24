@@ -11,6 +11,7 @@ class VirtualEnemy:
     body_damage = float('inf')
     health = float('inf')
     rewarding_experience = 0
+
     def __init__(self, x, y):
         self.position = Vector(x, y)
         self.velocity = Vector(0, 0)
@@ -18,14 +19,11 @@ class VirtualEnemy:
 
 class Client(HeadlessClient):
 
-    skills_to_learn = [
-        (4, [Ability.HealthRegen]),
-        (2, [Ability.BodyDamage, Ability.MovementSpeed, Ability.MaxHealth]),
-        (8, [Ability.HealthRegen]),
-        (8, [Ability.MovementSpeed]),
-        (8, [Ability.BodyDamage, Ability.MaxHealth]),
-        (8, Ability)
-    ]
+    skills_to_learn = [(4, [Ability.HealthRegen]), (2, [
+        Ability.BodyDamage, Ability.MovementSpeed, Ability.MaxHealth
+    ]), (8, [Ability.HealthRegen]), (8, [Ability.MovementSpeed]),
+                       (8, [Ability.BodyDamage, Ability.MaxHealth]), (8,
+                                                                      Ability)]
 
     def init(self):
         self.name = 'Roger'
@@ -46,8 +44,8 @@ class Client(HeadlessClient):
         vtx = self._hero.movement_speed * math.cos(theta)
         vty = self._hero.movement_speed * math.sin(theta)
         vcx, vcy = self._hero.velocity
-        return (math.hypot(dx, dy) + math.hypot(
-            vcx - vtx, vcy - vty) * 10) / self._hero.movement_speed
+        return (math.hypot(dx, dy) + math.hypot(vcx - vtx, vcy - vty) * 10
+                ) / self._hero.movement_speed
 
     def tick_to_recover(self, target):
         if not self._hero.health_regen:
@@ -74,34 +72,48 @@ class Client(HeadlessClient):
         vangle = math.atan2(vy, vx)
         mult = -math.sin(vangle - angle)
         ang = math.atan2(
-                mult * math.sin(angle + math.pi / 2) + math.sin(angle),
-                mult * math.cos(angle + math.pi / 2) + math.cos(angle),
+            mult * math.sin(angle + math.pi / 2) + math.sin(angle),
+            mult * math.cos(angle + math.pi / 2) + math.cos(angle),
         )
         self.accelerate(ang)
         self.shoot(ang + math.pi)
 
     def action(self, hero, polygons, heroes, bullets):
-
         def distance(p):
             px, py = p.position
             hx, hy = hero.position
             return math.hypot(px - hx, py - hy)
-        target = min([h for h in heroes if h.health * h.body_damage < (hero.health - hero.max_health * 0.3) * hero.body_damage], default=None, key=self.ncp)
+
+        target = min(
+            [
+                h for h in heroes if h.health * h.body_damage <
+                (hero.health - hero.max_health * 0.3) * hero.body_damage
+            ],
+            default=None,
+            key=self.ncp)
         if target is None and polygons:
-            target = min([h for h in polygons if h.health * h.body_damage < (hero.health - hero.max_health * 0.3) * hero.body_damage], default=None, key=self.ncp)
+            target = min(
+                [
+                    h for h in polygons if h.health * h.body_damage <
+                    (hero.health - hero.max_health * 0.3) * hero.body_damage
+                ],
+                default=None,
+                key=self.ncp)
         aggressive = False
         if target is not None:
-            if (hero.health > hero.max_health * 0.8 or
-                (hero.health > hero.max_health * 0.3 and hero.health_regen_cooldown)
-            ):
+            if (hero.health > hero.max_health * 0.8
+                    or (hero.health > hero.max_health * 0.3
+                        and hero.health_regen_cooldown)):
                 self.accelerate_to(*target.position)
                 aggressive = True
             else:
                 self.shoot_at(*target.position)
+
         def angle(p):
             px, py = p.position
             hx, hy = hero.position
             return math.atan2(py - hy, px - hx)
+
         if not aggressive:
             enemies = sorted(
                 itertools.chain(
@@ -110,8 +122,7 @@ class Client(HeadlessClient):
                     polygons,
                     # self.virtual_enemies(),
                 ),
-                key=distance
-            )
+                key=distance)
             if not enemies:
                 self.accelerate_to(2500, 2000)
             else:
@@ -133,7 +144,6 @@ class Client(HeadlessClient):
                 self.accelerate(eangle / ecount + math.pi)
 
         self.level_skill(hero)
-
 
 
 Client.main()

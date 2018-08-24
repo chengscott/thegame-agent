@@ -5,32 +5,17 @@ from thegame.gui import GuiClient
 import random
 
 
-
-
-
-class Client(GuiClient):
-
-
-
-
+class Client(HeadlessClient):
     def init(self):
 
-        self.name = 'momo' # 設定名稱
-
-
-
+        self.name = 'momo'  # 設定名稱
 
     def action(self, hero, heroes, polygons, bullets):
 
         print("I'm", hero)
 
-        print(
-
-            f'level: {hero.level}',
-
-            f'experience: {hero.experience}/{hero.experience_to_level_up}'
-
-        )
+        print(f'level: {hero.level}',
+              f'experience: {hero.experience}/{hero.experience_to_level_up}')
 
         print("I'm surrounded by these polygons:", polygons)
 
@@ -40,12 +25,12 @@ class Client(GuiClient):
 
         print('-' * 79)
 
-
         if heroes:
             self.accelerate_towards(*heroes[0].position)
             self.shoot_at(*heroes[0].position)
         else:
-            self.accelerate_towards(random.randint(0, 5000),random.randint(0,4000))
+            self.accelerate_towards(
+                random.randint(0, 5000), random.randint(0, 4000))
             self.shoot_at(*polygons[0].position)
         for i in range(200):
             self.level_up(Ability.BodyDamage)
@@ -54,10 +39,6 @@ class Client(GuiClient):
             self.level_up(Ability.BulletDamage)
             self.level_up(Ability.MaxHealth)
             self.level_up(Ability.BulletSpeed)
-
-
-
-
 
 
 Client.main()

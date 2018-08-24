@@ -2,8 +2,8 @@ from thegame import HeadlessClient, Ability, Polygon, Bullet, Hero
 from thegame.gui import GuiClient
 from math import hypot, pi, sin, asin, atan2
 
-class Client(GuiClient):
 
+class Client(HeadlessClient):
     def init(self):
         self.name = 'OArch'
 
@@ -19,6 +19,7 @@ class Client(GuiClient):
             for i in range(8):
                 self.level_up(Ability.BulletPenetration)
                 self.level_up(Ability.MovementSpeed)
+
         def cp(target):
             if target.health == 0: return 9999999
             tx, ty = target.position
@@ -26,12 +27,13 @@ class Client(GuiClient):
             return target.rewarding_experience / (
                 (target.health / hero.bullet_damage) *
                 (target.body_damage / hero.body_damage) *
-                (hypot(tx - hx, ty - hy) / hero.bullet_speed + hero.reload)
-            )
+                (hypot(tx - hx, ty - hy) / hero.bullet_speed + hero.reload))
+
         def shouldMove():
             return hero.health >= hero.max_health * 0.7 or (
-                hero.health >= hero.max_health * 0.5 and hero.health_regen_cooldown
-            )
+                hero.health >= hero.max_health * 0.5
+                and hero.health_regen_cooldown)
+
         def shoot_object(target):
             vx, vy = target.velocity
             dx = target.position.x - hero.position.x
@@ -40,9 +42,10 @@ class Client(GuiClient):
             u = hypot(vx, vy)
             v = hero.bullet_speed
             if u < v:
-                theta0 = asin(u/v*sin(phi))
+                theta0 = asin(u / v * sin(phi))
                 #theta1 = -asin(u/v*sin(phi)) + pi
                 self.shoot(atan2(dy, dx) + theta0)
+
         pv = 0
         if polygons:
             pm = max(polygons, key=cp)
@@ -50,15 +53,18 @@ class Client(GuiClient):
             self.shoot_at(*pm.position)
             if shouldMove():
                 self.accelerate_towards(*pm.position)
-        enemies = [x for x in heroes if not x.name.startswith('OA')
-            and hypot(*x.velocity) < hero.bullet_speed * 0.9]
+        enemies = [
+            x for x in heroes if not x.name.startswith('OA')
+            and hypot(*x.velocity) < hero.bullet_speed * 0.9
+        ]
         if enemies:
             hm = max(enemies, key=cp)
             hv = cp(hm)
             if pv < hv:
-                 #self.shoot_at(*hm.position)
-                 shoot_object(hm)
-                 if shouldMove():
-                     self.accelerate_towards(*hm.position)
+                #self.shoot_at(*hm.position)
+                shoot_object(hm)
+                if shouldMove():
+                    self.accelerate_towards(*hm.position)
+
 
 Client.main()
